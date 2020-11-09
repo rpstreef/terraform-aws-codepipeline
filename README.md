@@ -29,10 +29,26 @@ module "codepipeline" {
 
   build_image = "aws/codebuild/standard:4.0"
   buildspec   = data.template_file.buildspec.rendered
+
+  environment_variable_map = [
+    {
+      name  = "DOMAIN"
+      value = var.domain_name
+      type  = "PLAINTEXT"
+    },
+    {
+      name  = "CACHE"
+      value = var.domain_cache_settings
+      type  = "PLAINTEXT"
+    }
+  ]
 }
 ```
 
 ## Changelog
+
+### v1.1
+ - Added environment variables for Codebuild build, you can add additional variables as shown in the example.
 
 ### v1.0
  - Initial release
