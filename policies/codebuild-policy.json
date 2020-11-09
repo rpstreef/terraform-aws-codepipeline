@@ -1,35 +1,37 @@
 {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Resource": [
-          "*"
-        ],
-        "Action": [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "iam:PassRole"
-        ]
-      },
-      {
-        "Effect":"Allow",
-        "Action": [
-          "s3:PutObject",
-          "s3:PutObjectAcl",
-          "s3:GetObject",
-          "s3:GetObjectAcl",
-          "s3:GetBucketLocation",
-          "s3:ListBucket",
-          "s3:DeleteObject",
-          "s3:GetObjectVersion",
-          "s3:GetBucketVersioning"
-        ],
-        "Resource": [
-          "${s3_bucket_arn}",
-          "${s3_bucket_arn}/*"
-        ]
-      }
-    ]
-  }
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ],
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "iam:PassRole"
+      ]
+    },
+    {
+      "Effect":"Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:GetObject",
+        "s3:GetObjectAcl",
+        "s3:GetBucketLocation",
+        "s3:ListBucket",
+        "s3:DeleteObject",
+        "s3:GetObjectVersion",
+        "s3:GetBucketVersioning"
+      ],
+      "Resource": [
+        "${s3_bucket_arn}",
+        "${s3_bucket_arn}/*",
+        "${s3_deploy_bucket_arn}",
+        "${s3_deploy_bucket_arn}/*"
+      ]
+    }
+  ]
+}
