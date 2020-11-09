@@ -1,0 +1,21 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+    commands:
+      - pip3 install --upgrade aws-sam-cli
+      - cd dependencies/nodejs
+      # Do not install dev dependencies
+      - npm install --only=production
+      - cd ../../
+  build:
+    commands:
+      - sam build
+  post_build:
+    commands:
+      - sam package --s3-bucket $ARTIFACT_BUCKET --output-template-file packaged.yaml 
+artifacts:
+  files:
+    - packaged.yaml
+    - configuration.json
