@@ -1,5 +1,5 @@
 locals {
-  resource_name = "${var.namespace}-${var.resource_tag_name}"
+  resource_name = "${var.namespace}-${var.github_repo}"
 }
 
 # -----------------------------------------------------------------------------
@@ -39,8 +39,8 @@ module "iam_codepipeline" {
 
   assume_role_policy = file("${path.module}/policies/codepipeline-assume-role.json")
   template           = file("${path.module}/policies/codepipeline-policy.json")
-  role_name          = "codepipeline-role"
-  policy_name        = "codepipeline-policy"
+  role_name          = "codepipeline-${var.github_repo}-role"
+  policy_name        = "codepipeline-${var.github_repo}-policy"
 
   role_vars = {
     codebuild_project_arn = aws_codebuild_project._.arn
@@ -57,8 +57,8 @@ module "iam_cloudformation" {
 
   assume_role_policy = file("${path.module}/policies/cloudformation-assume-role.json")
   template           = file("${path.module}/policies/cloudformation-policy.json")
-  role_name          = "cloudformation-role"
-  policy_name        = "cloudformation-policy"
+  role_name          = "cloudformation-${var.github_repo}-role"
+  policy_name        = "cloudformation-${var.github_repo}-policy"
 
   role_vars = {
     s3_bucket_arn         = aws_s3_bucket.artifact_store.arn
@@ -97,10 +97,10 @@ resource "aws_codepipeline" "_" {
   }
 
   stage {
-    name = "Build & Deploy"
+    name = "BuildDeploy"
 
     action {
-      name             = "BuildAndDeploy"
+      name             = "Build"
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
@@ -136,8 +136,8 @@ module "iam_codebuild" {
 
   assume_role_policy = file("${path.module}/policies/codebuild-assume-role.json")
   template           = file("${path.module}/policies/codebuild-policy.json")
-  role_name          = "codebuild-role"
-  policy_name        = "codebuild-policy"
+  role_name          = "codebuild-${var.github_repo}-role"
+  policy_name        = "codebuild-${var.github_repo}-policy"
 
   role_vars = {
     s3_bucket_arn = aws_s3_bucket.artifact_store.arn
