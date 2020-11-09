@@ -62,6 +62,12 @@ variable "environment_variable_map" {
   description = "Additional environment variables for the build process. The type of environment variable. Valid values: PARAMETER_STORE, PLAINTEXT, and SECRETS_MANAGER."
 }
 
+variable "s3_deploy_bucket_arn" {
+  type        = string
+  default     = null
+  description = "S3 Bucket ARN used to deploy the solution, if any"
+}
+
 # -----------------------------------------------------------------------------
 # Variables: CodePipeline
 # -----------------------------------------------------------------------------

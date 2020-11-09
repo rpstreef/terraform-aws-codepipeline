@@ -11,6 +11,10 @@ This can be used for instance to deploy a static website to an S3 bucket or in c
 This version of the module expects GitHub as source code repository to be used. You'll need an OAuthToken (``github_token``)  that has access to the repo (``github_repo``) you want to read from.
 
 ```hcl
+locals {
+  s3_deployment_bucket_arn = "arn:aws:s3:::${var.domain_name}"
+}
+
 data "template_file" "buildspec" {
   template = file("${path.module}/codebuild/buildspec.yml")
 }
@@ -29,6 +33,8 @@ module "codepipeline" {
 
   build_image = "aws/codebuild/standard:4.0"
   buildspec   = data.template_file.buildspec.rendered
+
+  s3_deploy_bucket_arn = local.s3_deployment_bucket_arn
 
   environment_variable_map = [
     {

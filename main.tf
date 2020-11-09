@@ -140,7 +140,8 @@ module "iam_codebuild" {
   policy_name        = "codebuild-${var.github_repo}-policy"
 
   role_vars = {
-    s3_bucket_arn = aws_s3_bucket.artifact_store.arn
+    s3_bucket_arn        = aws_s3_bucket.artifact_store.arn
+    s3_deploy_bucket_arn = var.s3_deploy_bucket_arn
   }
 }
 
