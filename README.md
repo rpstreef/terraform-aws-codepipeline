@@ -55,6 +55,9 @@ module "codepipeline" {
 
 ## Changelog
 
+### v1.3.1
+ - Changed; `s3_deploy_bucket_arn` to be optional such that any 2 stage CodePipeline can be configured. 
+
 ### v1.3
  - Changed Git connections to Codestar Connections. Please note:
  `The aws_codestarconnections_connection resource is created in the state PENDING. Authentication with the connection provider must be completed in the AWS Console.`
