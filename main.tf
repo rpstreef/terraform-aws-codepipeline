@@ -116,7 +116,7 @@ resource "aws_codepipeline" "_" {
     action {
       name             = "Source"
       category         = "Source"
-      owner            = "ThirdParty"
+      owner            = "AWS"
       provider         = "CodeStarSourceConnection"
       version          = "1"
       output_artifacts = ["source"]
