@@ -77,25 +77,25 @@ variable "s3_deploy_bucket_arn" {
 # -----------------------------------------------------------------------------
 # Variables: CodePipeline
 # -----------------------------------------------------------------------------
-variable "github_token" {
-  type        = string
-  description = "Github OAuth token"
-}
-
-variable "github_owner" {
+variable "git_owner" {
   type        = string
   description = "Github username"
 }
 
-variable "github_repo" {
+variable "git_repo" {
   type        = string
   description = "Github repository name"
 }
 
-variable "github_branch" {
+variable "git_branch" {
   type        = string
   description = "Github branch name"
   default     = "master"
+}
+
+variable "git_provider_type" {
+  description = "Codestar connections support; GitHub, Bitbucket"
+  default = "GitHub"
 }
 
 variable "poll_source_changes" {

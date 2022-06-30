@@ -54,6 +54,12 @@ module "codepipeline" {
 ```
 
 ## Changelog
+
+### v1.3
+ - Changed Git connections to Codestar Connections. Please note:
+ `The aws_codestarconnections_connection resource is created in the state PENDING. Authentication with the connection provider must be completed in the AWS Console.`
+ - Supported git providers; GitHub and Bitbucket
+ 
 ### v1.2
  - Added `codepipeline_module_enabled`, to enable or disable creation of all resources in this module
  - Changed outputs to output all properties in; `codepipeline` and `codebuild` resources.

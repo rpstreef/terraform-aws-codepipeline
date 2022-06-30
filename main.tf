@@ -1,5 +1,5 @@
 locals {
-  resource_name = "${var.environment}-${var.github_repo}"
+  resource_name = "${var.environment}-${var.git_repo}"
 
   tags = {
     Environment = var.environment
@@ -61,8 +61,8 @@ module "iam_codepipeline" {
 
   assume_role_policy = file("${path.module}/policies/codepipeline-assume-role.json")
   template           = file("${path.module}/policies/codepipeline-policy.json")
-  role_name          = "codepipeline-${var.github_repo}-role"
-  policy_name        = "codepipeline-${var.github_repo}-policy"
+  role_name          = "codepipeline-${var.git_repo}-role"
+  policy_name        = "codepipeline-${var.git_repo}-policy"
 
   role_vars = {
     codebuild_project_arn = try(one(aws_codebuild_project._.*.arn), "")
@@ -81,13 +81,22 @@ module "iam_cloudformation" {
 
   assume_role_policy = file("${path.module}/policies/cloudformation-assume-role.json")
   template           = file("${path.module}/policies/cloudformation-policy.json")
-  role_name          = "cloudformation-${var.github_repo}-role"
-  policy_name        = "cloudformation-${var.github_repo}-policy"
+  role_name          = "cloudformation-${var.git_repo}-role"
+  policy_name        = "cloudformation-${var.git_repo}-policy"
 
   role_vars = {
     s3_bucket_arn         = try(one(aws_s3_bucket.artifact_store.*.arn), "")
     codepipeline_role_arn = try(module.iam_codepipeline.role_arn, "")
   }
+}
+
+# The aws_codestarconnections_connection resource is created in the state PENDING. 
+# Authentication with the connection provider must be completed in the AWS Console.
+resource "aws_codestarconnections_connection" "_" {
+  count = var.codepipeline_module_enabled ? 1 : 0
+
+  name          = "${local.resource_name}-codestar-connection"
+  provider_type = var.git_provider_type
 }
 
 resource "aws_codepipeline" "_" {
@@ -108,16 +117,14 @@ resource "aws_codepipeline" "_" {
       name             = "Source"
       category         = "Source"
       owner            = "ThirdParty"
-      provider         = "GitHub"
+      provider         = "CodeStarSourceConnection"
       version          = "1"
       output_artifacts = ["source"]
 
       configuration = {
-        OAuthToken           = var.github_token
-        Owner                = var.github_owner
-        Repo                 = var.github_repo
-        Branch               = var.github_branch
-        PollForSourceChanges = var.poll_source_changes
+        ConnectionArn    = one(aws_codestarconnections_connection._.*.arn)
+        FullRepositoryId = "${var.git_owner}/${var.git_repo}"
+        BranchName       = var.git_branch 
       }
     }
   }
@@ -161,8 +168,8 @@ module "iam_codebuild" {
 
   assume_role_policy = file("${path.module}/policies/codebuild-assume-role.json")
   template           = file("${path.module}/policies/codebuild-policy.json")
-  role_name          = "codebuild-${var.github_repo}-role"
-  policy_name        = "codebuild-${var.github_repo}-policy"
+  role_name          = "codebuild-${var.git_repo}-role"
+  policy_name        = "codebuild-${var.git_repo}-policy"
 
   role_vars = {
     s3_bucket_arn        = try(one(aws_s3_bucket.artifact_store.*.arn), "")
