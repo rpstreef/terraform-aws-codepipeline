@@ -52,6 +52,10 @@ module "codepipeline" {
 ```
 
 ## Changelog
+### v1.2
+ - Added `codepipeline_module_enabled`, to enable or disable creation of all resources in this module
+ - Changed outputs to output all properties in; `codepipeline` and `codebuild` resources.
+ - Updated deprecated S3 resource configurations.
 
 ### v1.1
  - Added environment variables for Codebuild build, you can add additional variables as shown in the example.
