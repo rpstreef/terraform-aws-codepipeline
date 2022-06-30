@@ -95,7 +95,7 @@ module "iam_cloudformation" {
 resource "aws_codestarconnections_connection" "_" {
   count = var.codepipeline_module_enabled ? 1 : 0
 
-  name          = "${local.resource_name}-codestar-connection"
+  name          = "${local.resource_name}-cs"
   provider_type = var.git_provider_type
 }
 
