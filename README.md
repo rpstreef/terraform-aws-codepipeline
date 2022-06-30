@@ -23,8 +23,10 @@ module "codepipeline" {
   source = "github.com/rpstreef/terraform-aws-codepipeline?ref=v1.0"
 
   resource_tag_name = var.resource_tag_name
-  namespace         = var.namespace
+  environment       = var.environment
   region            = var.region
+
+  codepipeline_module_enabled = var.codepipeline_module_enabled
 
   github_token        = var.github_token
   github_owner        = var.github_owner
