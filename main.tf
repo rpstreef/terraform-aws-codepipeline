@@ -34,12 +34,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "_" {
   bucket = try(one(aws_s3_bucket.artifact_store.*.id), "")
 
   rule {
-    id = "lifecycle_rule_codepipeline_expiration"
+    id     = "lifecycle_rule_codepipeline_expiration"
     status = "Enabled"
     expiration {
       days = 5
     }
-  } 
+  }
 }
 
 resource "aws_s3_bucket_acl" "_" {
@@ -124,7 +124,7 @@ resource "aws_codepipeline" "_" {
       configuration = {
         ConnectionArn    = one(aws_codestarconnections_connection._.*.arn)
         FullRepositoryId = "${var.git_owner}/${var.git_repo}"
-        BranchName       = var.git_branch 
+        BranchName       = var.git_branch
       }
     }
   }
@@ -157,24 +157,78 @@ resource "aws_codepipeline" "_" {
 # -----------------------------------------------------------------------------
 # Resources: CodeBuild
 # -----------------------------------------------------------------------------
-module "iam_codebuild" {
-  source = "github.com/rpstreef/tf-iam?ref=v1.2"
-
-  environment       = var.environment
-  region            = var.region
-  resource_tag_name = var.resource_tag_name
-
-  iam_module_enabled = var.codepipeline_module_enabled
-
-  assume_role_policy = file("${path.module}/policies/codebuild-assume-role.json")
-  template           = file("${path.module}/policies/codebuild-policy.json")
-  role_name          = "codebuild-${var.git_repo}-role"
-  policy_name        = "codebuild-${var.git_repo}-policy"
-
-  role_vars = {
-    s3_bucket_arn        = try(one(aws_s3_bucket.artifact_store.*.arn), "")
-    s3_deploy_bucket_arn = var.s3_deploy_bucket_arn
+data "aws_iam_policy_document" "policy_codebuild" {
+  statement {
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "iam:PassRole"
+    ]
   }
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:PutObjectAcl",
+      "s3:GetObject",
+      "s3:GetObjectAcl",
+      "s3:GetBucketLocation",
+      "s3:ListBucket",
+      "s3:DeleteObject",
+      "s3:GetObjectVersion",
+      "s3:GetBucketVersioning"
+    ]
+    resources = compact([
+      "${try(one(aws_s3_bucket.artifact_store.*.arn), "")}",
+      "${try(one(aws_s3_bucket.artifact_store.*.arn), "")}/*",
+      "${try(var.s3_deploy_bucket_arn, "")}",
+      "${try(var.s3_deploy_bucket_arn, "")}"
+    ])
+  }
+}
+
+data "aws_iam_policy_document" "assume_role_codebuild" {
+  statement {
+    principals {
+      type        = "Service"
+      identifiers = ["codebuild.amazonaws.com"]
+    }
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "codebuild" {
+  count = var.codepipeline_module_enabled ? 1 : 0
+
+  name = "${local.resource_name}"
+
+  assume_role_policy = one(data.aws_iam_policy_document.assume_role_codebuild.*.json)
+
+  tags = local.tags
+}
+
+resource "aws_iam_policy" "_" {
+  count = var.codepipeline_module_enabled ? 1 : 0
+
+  name = "${local.resource_name}"
+
+  policy = one(data.aws_iam_policy_document.policy_codebuild.*.json)
+
+  tags = local.tags
+}
+
+resource "aws_iam_policy_attachment" "_" {
+  count = var.codepipeline_module_enabled ? 1 : 0
+
+  name = "${local.resource_name}-policy-attachement"
+
+  policy_arn = one(aws_iam_policy._.*.arn)
+  roles      = [one(aws_iam_role.codebuild.*.name)]
 }
 
 resource "aws_codebuild_project" "_" {
@@ -184,7 +238,7 @@ resource "aws_codebuild_project" "_" {
   description   = "${local.resource_name}_codebuild_project"
   build_timeout = var.build_timeout
   badge_enabled = var.badge_enabled
-  service_role  = try(module.iam_codebuild.role_arn, "")
+  service_role  = one(aws_iam_role.codebuild.*.arn)
 
   artifacts {
     type           = "CODEPIPELINE"
