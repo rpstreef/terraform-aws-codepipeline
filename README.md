@@ -28,11 +28,10 @@ module "codepipeline" {
 
   codepipeline_module_enabled = var.codepipeline_module_enabled
 
-  github_token        = var.github_token
-  github_owner        = var.github_owner
-  github_repo         = var.github_repo
-  poll_source_changes = var.poll_source_changes
-
+  git_owner        = var.git_owner
+  git_repo         = var.git_repo
+  git_branch       = var.git_branch
+  
   build_image = "aws/codebuild/standard:4.0"
   buildspec   = data.template_file.buildspec.rendered
 
