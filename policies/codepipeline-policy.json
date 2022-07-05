@@ -26,6 +26,13 @@
     {
       "Effect": "Allow",
       "Action": [
+        "codestar-connections:UseConnection"
+      ],
+      "Resource": "${codestar_arn}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "cloudformation:CreateStack",
         "cloudformation:DescribeStacks",
         "cloudformation:DeleteStack",

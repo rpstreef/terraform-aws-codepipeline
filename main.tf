@@ -67,6 +67,7 @@ module "iam_codepipeline" {
   role_vars = {
     codebuild_project_arn = try(one(aws_codebuild_project._.*.arn), "")
     s3_bucket_arn         = try(one(aws_s3_bucket.artifact_store.*.arn), "")
+    codestar_arn          = try(one(aws_codestarconnections_connection._.arn))
   }
 }
 
