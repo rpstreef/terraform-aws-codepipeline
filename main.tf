@@ -11,6 +11,8 @@ locals {
 # Resources: Random string
 # -----------------------------------------------------------------------------
 resource "random_string" "postfix" {
+  count = var.codepipeline_module_enabled ? 1 : 0
+
   length  = 6
   numeric = false
   upper   = false
@@ -24,7 +26,7 @@ resource "random_string" "postfix" {
 resource "aws_s3_bucket" "artifact_store" {
   count = var.codepipeline_module_enabled ? 1 : 0
 
-  bucket        = "${local.resource_name}-codepipeline-artifacts-${random_string.postfix.result}"
+  bucket        = "${local.resource_name}-codepipeline-artifacts-${try(one(random_string.postfix.*.result))}"
   force_destroy = true
 }
 
@@ -159,6 +161,8 @@ resource "aws_codepipeline" "_" {
 # Resources: CodeBuild
 # -----------------------------------------------------------------------------
 data "aws_iam_policy_document" "policy_codebuild" {
+  count = var.codepipeline_module_enabled ? 1 : 0
+
   statement {
     effect = "Allow"
     resources = [
@@ -194,6 +198,7 @@ data "aws_iam_policy_document" "policy_codebuild" {
 }
 
 data "aws_iam_policy_document" "assume_role_codebuild" {
+  count = var.codepipeline_module_enabled ? 1 : 0
   statement {
     principals {
       type        = "Service"
